@@ -150,7 +150,7 @@ def get_output_directory():
     return dir_out
 
 
-def do_shp_dir(dir_input=''):
+def do_csv_dir(dir_input=''):
     _yes = cfg.value_yes
     _no = cfg.value_no
     _error = cfg.value_error
@@ -163,20 +163,20 @@ def do_shp_dir(dir_input=''):
     if os.path.isfile(file_csv):
         os.remove(file_csv)
 
-    csv_dict = {'FILENAME': '',
-                'PRJ': '',
-                'SRID': '',
-                'METADATA': '',
-                'CODEPAGE': '',
-                'HAS_DEFIS': '',
-                'DATA_CREATION': '',
-                'DATA_MODIFY': '',
-                'DATA_LASTACCESS': '',
-                'DATA_SCRIPT_RUN': '',
-                'PRJ_INFO': '',
-                'COUNT_REC': '',
-                'COUNT_FIELDS': '',
-                'FIELDS': ''}  # 'CODEPAGE_DBF': '', # CODEPAGE_DBF -  work a long time
+    csv_dict = {'COMPNAME': '',
+                'DISK': '',
+                'FOLDER': '',
+                'FILENAME': '',
+                # 'CODEPAGE': '',
+                # 'HAS_DEFIS': '',
+                # 'DATA_CREATION': '',
+                # 'DATA_MODIFY': '',
+                # 'DATA_LASTACCESS': '',
+                # 'DATA_SCRIPT_RUN': '',
+                # 'PRJ_INFO': '',
+                # 'COUNT_REC': '',
+                # 'COUNT_FIELDS': '',
+                'LAST_UPDATE': ''}  # 'CODEPAGE_DBF': '', # CODEPAGE_DBF -  work a long time
 
     with open(file_csv, 'w', newline='', encoding='utf-8') as csv_file:  # Just use 'w' mode in 3.x
 
@@ -200,39 +200,6 @@ def do_shp_dir(dir_input=''):
                     csv_dict['DATA_LASTACCESS'] = str(
                         datetime.fromtimestamp(os.path.getatime(file_path)).strftime('%Y-%m-%d'))
 
-                    # Prj file exist
-                    file_prj = file_name + '.prj'
-                    if os.path.isfile(file_prj):
-                        csv_dict['PRJ_INFO'] = file_get_first_line(file_prj)
-                        csv_dict['PRJ'] = _yes
-                        try:
-                            ident = Sridentify(call_remote_api=False)  # Sridentify() # if we need  remote call
-                            ident.from_file(file_prj)
-                            srid = ident.get_epsg()
-                            if len(str(srid)):
-                                csv_dict['SRID'] = str(srid)
-                            else:
-                                csv_dict['SRID'] = _no
-                        except:
-                            csv_dict['SRID'] = _error
-                            pass
-                    else:
-                        csv_dict['PRJ'] = _no
-                        csv_dict['SRID'] = _no
-
-                    # Metadata exist
-                    file_prj = file_name + '.shp.xml'
-                    if os.path.isfile(file_prj):
-                        csv_dict['METADATA'] = _yes
-                    else:
-                        csv_dict['METADATA'] = _no
-
-                    # Codepage exist
-                    file_cp = file_name + '.cpg'
-                    if os.path.isfile(file_cp):
-                        csv_dict['CODEPAGE'] = str(file_get_first_line(file_cp))
-                    else:
-                        csv_dict['CODEPAGE'] = _no
 
                     # Codepage DBF - work long time
                     # file_dbf = file_name + '.dbf'
@@ -243,38 +210,6 @@ def do_shp_dir(dir_input=''):
                     #     csv_dict['CODEPAGE_DBF'] = _no
 
                     # Get records Count from DBF - work long time
-                    file_dbf = file_name + '.dbf'
-                    if os.path.isfile(file_dbf):
-                        sf = shapefile.Reader(file_dbf)
-                        fields = sf.fields
-                        fields_count = str(len(fields) - 1)
-                        ss = ''
-                        for field in fields:
-                            ss = ss + str(field[0])
-                            ss = ss + ", "
-                        ss = ss.strip('DeletionFlag')
-                        if ss.endswith(', '):
-                           ss = ss.lstrip(', ')
-                           ss = ss.rstrip(', ')
-
-                        records = sf.records()
-                        _count = len(records)
-
-                        csv_dict['COUNT_REC'] = str(_count)
-                        csv_dict['COUNT_FIELDS'] = fields_count
-                        csv_dict['FIELDS'] = str(ss)
-
-                    else:
-                        csv_dict['COUNT_REC'] = 0
-                        csv_dict['COUNT_FIELDS'] = 0
-                        csv_dict['FIELDS'] = 0
-
-                    # defis symbol has found in file name
-                    file_1 = str(file)
-                    if file_1.find('-') != -1:
-                        csv_dict['HAS_DEFIS'] = _yes
-                    else:
-                        csv_dict['HAS_DEFIS'] = _no
 
                     # if len(str_log):
                     csv_file_open.writerow(csv_dict)
@@ -289,7 +224,7 @@ def main():
 
     dir_input = get_input_directory()
 
-    do_shp_dir(dir_input)
+    do_csv_dir(dir_input)
 
     # csv2xls()
 
