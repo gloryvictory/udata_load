@@ -102,6 +102,23 @@ def get_output_directory():
 
 
 def do_csv_file_in(filename_with_path=''):
+    csv_dict = {'COMPNAME': '',
+                'DISK': '',
+                'FOLDER': '',
+                'FILENAME': '',
+                # 'CODEPAGE': '',
+                # 'HAS_DEFIS': '',
+                # 'DATA_CREATION': '',
+                # 'DATA_MODIFY': '',
+                # 'DATA_LASTACCESS': '',
+                # 'DATA_SCRIPT_RUN': '',
+                # 'PRJ_INFO': '',
+                # 'COUNT_REC': '',
+                # 'COUNT_FIELDS': '',
+                'LAST_UPDATE': ''}  # 'CODEPAGE_DBF': '', # CODEPAGE_DBF -  work a long time
+
+
+
     file_name = filename_with_path.split('.')[0]
     # print(file_name)
     # with open(filename_with_path, newline='', encoding='utf-8') as csvfile:
@@ -122,6 +139,17 @@ def do_csv_file_in(filename_with_path=''):
     #     data_read = [row for row in reader]
     #     print(data_read[0])
 
+    # file_csv = str(os.path.join(get_output_directory(), cfg.file_csv))  # from cfg.py file
+    # with open(file_csv, 'w', newline='', encoding='utf-8') as csv_file:  # Just use 'w' mode in 3.x
+
+    for key in csv_dict:
+        csv_dict[key] = ''
+    # csv_dict['DATA_SCRIPT_RUN'] = str(time.strftime("%Y-%m-%d"))
+    csv_dict['FILENAME'] = file_name # file_path
+
+    # csv_file_open = csv.DictWriter(csv_file, csv_dict.keys(), delimiter=cfg.csv_delimiter)
+    # csv_file_open.writeheader()
+
     with open(filename_with_path, 'r', encoding='utf-8') as csvfile:
      #sniff to find the format
         filedialect = csv.Sniffer().sniff(csvfile.read(1024))
@@ -133,65 +161,44 @@ def do_csv_file_in(filename_with_path=''):
             print(row)
 
 
+# csv_dict['DATA_LASTACCESS'] = str(
+#     datetime.fromtimestamp(os.path.getatime(file_path)).strftime('%Y-%m-%d'))
+# Codepage DBF - work long time
+# file_dbf = file_name + '.dbf'
+# if os.path.isfile(file_dbf):
+#
+#     csv_dict['CODEPAGE_DBF'] = get_encoding(file_dbf)
+# else:
+#     csv_dict['CODEPAGE_DBF'] = _no
+# Get records Count from DBF - work long time
+# if len(str_log):
+
+# print(str(csv_dict.values()))
+
+
+#    csv_file_open.writerow(csv_dict)
+#         csv_file.close()
+
+
 def do_csv_dir(dir_input=''):
-    #_yes = cfg.value_yes
-    #_no = cfg.value_no
-    #_error = cfg.value_error
-    # file_csv = cfg.file_csv
-
-    file_csv = str(os.path.join(get_output_directory(),
-                                cfg.file_csv))  # str(strftime("%Y-%m-%d") + "_shp_info_in_folder_" + ".csv")
-
+    # Если выходной CSV файл существует - удаляем его
+    file_csv = str(os.path.join(get_output_directory(), cfg.file_csv)) # from cfg.file
     if os.path.isfile(file_csv):
         os.remove(file_csv)
 
-    csv_dict = {'COMPNAME': '',
-                'DISK': '',
-                'FOLDER': '',
-                'FILENAME': '',
-                # 'CODEPAGE': '',
-                # 'HAS_DEFIS': '',
-                # 'DATA_CREATION': '',
-                # 'DATA_MODIFY': '',
-                # 'DATA_LASTACCESS': '',
-                # 'DATA_SCRIPT_RUN': '',
-                # 'PRJ_INFO': '',
-                # 'COUNT_REC': '',
-                # 'COUNT_FIELDS': '',
-                'LAST_UPDATE': ''}  # 'CODEPAGE_DBF': '', # CODEPAGE_DBF -  work a long time
+    # Если выходной LOG файл существует - удаляем его
+    file_log = str(os.path.join(get_output_directory(), cfg.file_log))  # from cfg.file
+    if os.path.isfile(file_log):
+        os.remove(file_log)
 
-    with open(file_csv, 'w', newline='', encoding='utf-8') as csv_file:  # Just use 'w' mode in 3.x
-
-        csv_file_open = csv.DictWriter(csv_file, csv_dict.keys(), delimiter=cfg.csv_delimiter)
-        csv_file_open.writeheader()
-        for root, subdirs, files in os.walk(dir_input):
-            for file in os.listdir(root):
-                file_path = str(os.path.join(root, file)).lower()
-                ext = '.'.join(file.split('.')[1:]).lower()
-                if os.path.isfile(file_path) and file_path.endswith('csv'):#ext == "csv":
-                    for key in csv_dict:
-                        csv_dict[key] = ''
-                    #csv_dict['DATA_SCRIPT_RUN'] = str(time.strftime("%Y-%m-%d"))
-                    csv_dict['FILENAME'] = file_path
+    for root, subdirs, files in os.walk(dir_input):
+        for file in os.listdir(root):
+            file_path = str(os.path.join(root, file)).lower()
+            ext = '.'.join(file.split('.')[1:]).lower()
+            if os.path.isfile(file_path) and file_path.endswith('csv'):     #ext == "csv":
+                do_csv_file_in(file_path)
 
 
-                    do_csv_file_in(file_path)
-
-
-                    # csv_dict['DATA_LASTACCESS'] = str(
-                    #     datetime.fromtimestamp(os.path.getatime(file_path)).strftime('%Y-%m-%d'))
-                    # Codepage DBF - work long time
-                    # file_dbf = file_name + '.dbf'
-                    # if os.path.isfile(file_dbf):
-                    #
-                    #     csv_dict['CODEPAGE_DBF'] = get_encoding(file_dbf)
-                    # else:
-                    #     csv_dict['CODEPAGE_DBF'] = _no
-                    # Get records Count from DBF - work long time
-                    # if len(str_log):
-                    csv_file_open.writerow(csv_dict)
-                    # print(str(csv_dict.values()))
-        csv_file.close()
 
 
 # ---------------- do main --------------------------------
