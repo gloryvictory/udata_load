@@ -34,46 +34,38 @@ import csv
 import cfg  # some global configurations
 
 
+def get_input_directory_from_cfg():
+    directory_in = str(os.getcwd())
+    if _platform == "linux" or _platform == "linux2" or _platform == "darwin":
+        if os.path.isdir(cfg.folder_linux_in):
+            print('Input directory from a config file: ' + cfg.folder_linux_in)
+            return cfg.folder_linux_in
+        else:
+            print('Input directories from config wrong: ' + cfg.folder_linux_in + ' Using current directory: ' + directory_in)
+            return directory_in
+    if _platform == "win32" or _platform == "win64":  # Windows or Windows 64-bit
+        if os.path.isdir(cfg.folder_win_in):
+            print('Input directory from a config file: ' + cfg.folder_win_in)
+            return cfg.folder_win_in
+        else:
+            print('Input directories from config wrong: ' + cfg.folder_win_in + ' Using current directory: ' + directory_in)
+            return directory_in
+    return directory_in
+
+
 def get_input_directory():
     # get from config
-    directory_in_win = cfg.folder_win_in
-    directory_in_linux = cfg.folder_linux_in
     directory_in = str(os.getcwd())
     # if only run the script (1 argument)
-    if len(sys.argv) == 1:  # there is only one argument in command line
-        # Linux platform
-        if _platform == "linux" or _platform == "linux2" or _platform == "darwin":
-            directory_in = directory_in_linux
-            return directory_in
-        if _platform == "win32" or _platform == "win64":  # Windows or Windows 64-bit
-            directory_in = directory_in_win
-            return directory_in
-        else:
-            directory_in = str(os.getcwd())
-            print(
-                'Input directories from config wrong: ' + directory_in_win + ' or ' + directory_in_linux + ' Using current directory: ' + directory_in)
-        print('Input directory from a config file: ' + directory_in)
-        return directory_in
+    if len(sys.argv) == 1:  # there is no arguments in command line
+        return get_input_directory_from_cfg()
 
     if len(sys.argv) == 2:  # there is only one argument in command line
         directory_in = str(sys.argv[1:][0])
         if os.path.isdir(directory_in):
             return directory_in
         else:
-            print(
-                directory_in + " is not a Directory (Folder). Please specify an input directory. correctly. We use config file parameters.")
-            if _platform == "linux" or _platform == "linux2" or _platform == "darwin":  # Linux platform
-                directory_in = directory_in_linux
-                return directory_in
-            if _platform == "win32" or _platform == "win64":  # Windows or Windows 64-bit
-                directory_in = directory_in_win
-                return directory_in
-            else:
-                directory_in = str(os.getcwd())
-                print(
-                    'Input directories from config wrong: ' + directory_in_win + ' or ' + directory_in_linux + ' Using current directory: ' + directory_in)
-            print('Input directory from a config file: ' + directory_in)
-            return directory_in
+            return get_input_directory_from_cfg()
 
     if len(sys.argv) > 2:  # there is only one argument in command line
         print("Arguments much more than 1! Please use only path as an argument. (Script.py /mnt/some_path) ")
@@ -87,14 +79,15 @@ def get_output_directory():
     # Linux platform
     if _platform == "linux" or _platform == "linux2" or _platform == "darwin":
         dir_out = cfg.folder_linux_out
+        print('Output directory from config file: ' + dir_out)
         if os.path.exists(dir_out) and os.path.isdir(dir_out):
             return dir_out
     if _platform == "win32" or _platform == "win64":  # Windows or Windows 64-bit
         dir_out = cfg.folder_win_out
+        print('Output directory from config file' + dir_out)
         if os.path.exists(dir_out) and os.path.isdir(dir_out):
             return dir_out
     else:
-        dir_out = str(os.getcwd())
         print(
             'Output directories from config wrong: ' + cfg.folder_out_win + ' or ' + cfg.folder_out_linux + ' Using current directory: ' + dir_out)
     print('Using Output directory: ' + dir_out)
@@ -150,30 +143,54 @@ def do_csv_file_in(filename_with_path=''):
     # csv_file_open = csv.DictWriter(csv_file, csv_dict.keys(), delimiter=cfg.csv_delimiter)
     # csv_file_open.writeheader()
 
-    with open(filename_with_path, 'r', encoding='utf-8') as csvfile:
-     #sniff to find the format
-        filedialect = csv.Sniffer().sniff(csvfile.read(1024))
-        csvfile.seek(0)
-        #read the CSV file into a dictionary
-        dict_reader = csv.DictReader(csvfile, dialect=filedialect, quotechar='"')
-        for row in dict_reader:
-            #do your processing here
-            print(row)
+    #first_line = file_get_first_line(filename_with_path)
+
+    import codecs
+    f = codecs.open(filename_with_path, 'r', 'UTF-8')
+
+    # get Headers from file
+    for line in f:
+        ss = line.strip()
+        headers = ss.split(',')
+        headers2 = []
+        for header in headers:
+            ss = header.strip('\"')
+            headers2.append(ss)
+        print('Columns from csv_file: ' + str(len(headers)) + ' in File: ' + filename_with_path)
+        column_names_in = cfg.csv_fieldnames_in
+        print('Columns from cfg: ' + str(len(column_names_in)))
+        tt = [x for x in headers2 if x in column_names_in]  # [x for x in a if x in b]
+        print('Сolumns matched: ' + str(len(tt)) + ' Columns: ' + str(tt))
+
+        break    # break here
+
+    for line in f:
+        next(f) # skip first ine
+        asd = str(line).split(cfg.csv_delimiter)
+        print(line)
 
 
-# csv_dict['DATA_LASTACCESS'] = str(
-#     datetime.fromtimestamp(os.path.getatime(file_path)).strftime('%Y-%m-%d'))
-# Codepage DBF - work long time
-# file_dbf = file_name + '.dbf'
-# if os.path.isfile(file_dbf):
-#
-#     csv_dict['CODEPAGE_DBF'] = get_encoding(file_dbf)
-# else:
-#     csv_dict['CODEPAGE_DBF'] = _no
-# Get records Count from DBF - work long time
-# if len(str_log):
 
-# print(str(csv_dict.values()))
+    # with open(filename_with_path, 'r', encoding='utf-8') as csvfile:
+    #     #read the CSV file into a dictionary
+    #     dict_reader = csv.DictReader(csvfile, dialect='excel', quotechar='"', delimiter=cfg.csv_delimiter)
+    #     column_names = dict_reader.fieldnames
+    #     column_names_in = cfg.csv_fieldnames_in
+    #
+    #     print('Columns from cfg: ' + str(len(column_names_in)))
+    #     print('Columns from csv_file: ' + str(len(column_names)) + ' in File: ' + filename_with_path)
+    #
+    #     tt = [x for x in column_names if x in column_names_in]  # [x for x in a if x in b]
+    #     print('Сolumns matched: ' + str(len(tt)) + ' Columns: ' + str(tt))
+    #
+    #     reader = csv.reader(csvfile)
+    #     for row in reader:
+    #         #do your processing here
+    #         asd = str(row).split(cfg.csv_delimiter)
+    #         qq = row['compname']
+    #         aa = row['FullName']
+    #         print(qq)
+
 
 
 #    csv_file_open.writerow(csv_dict)
@@ -191,13 +208,14 @@ def do_csv_dir(dir_input=''):
     if os.path.isfile(file_log):
         os.remove(file_log)
 
-    for root, subdirs, files in os.walk(dir_input):
-        for file in os.listdir(root):
-            file_path = str(os.path.join(root, file)).lower()
-            ext = '.'.join(file.split('.')[1:]).lower()
-            if os.path.isfile(file_path) and file_path.endswith('csv'):     #ext == "csv":
-                do_csv_file_in(file_path)
+    # for root, subdirs, files in os.walk(dir_input):
+    #     for file in os.listdir(root):
+    #         file_path = str(os.path.join(root, file)).lower()
+    #         ext = '.'.join(file.split('.')[1:]).lower()
+    #         if os.path.isfile(file_path) and file_path.endswith('csv'):     #ext == "csv":
+    #             do_csv_file_in(file_path) #'e:\\temp\\csv\\weizelev-c-.csv'
 
+    do_csv_file_in('e:\\temp\\csv\\weizelev-c-.csv')  # 'e:\\temp\\csv\\weizelev-c-.csv'
 
 
 
