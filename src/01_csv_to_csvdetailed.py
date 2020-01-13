@@ -148,6 +148,9 @@ def do_csv_file_in(filename_with_path=''):
             tmpstr = tmpstr.replace("\"", "")
             creation_time = tmpstr.strip()
 
+            _compname = compname
+            _disk = file_full_path_name.split(":")[0]
+            _folder = str(os.path.dirname(os.path.abspath(file_full_path_name)))
 
 
             print(line)
