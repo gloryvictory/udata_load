@@ -21,7 +21,9 @@ import time
 from sys import platform as _platform
 from time import strftime  # Load just the strftime Module from Time
 from datetime import datetime
-import csv
+#import csv
+import codecs
+
 # non standard packages
 
 # try:
@@ -110,45 +112,16 @@ def do_csv_file_in(filename_with_path=''):
                 # 'COUNT_FIELDS': '',
                 'LAST_UPDATE': ''}  # 'CODEPAGE_DBF': '', # CODEPAGE_DBF -  work a long time
 
-
-
     file_name = filename_with_path.split('.')[0]
-    # print(file_name)
-    # with open(filename_with_path, newline='', encoding='utf-8') as csvfile:
-    #     reader = csv.DictReader(csvfile)
-    #     for row in reader:
-    #         print(row['FullName'], row['Length'])
-
-
-    # # Read CSV file
-    # kwargs = {'newline': ''}
-    # mode = 'r'
-    # if sys.version_info < (3, 0):
-    #     kwargs.pop('newline', None)
-    #     mode = 'rb'
-    # with open(filename_with_path, mode, **kwargs) as fp:
-    #     reader = csv.reader(fp, delimiter=cfg.csv_delimiter, quotechar='"') #delimiter=','
-    #     # next(reader, None)  # skip the headers
-    #     data_read = [row for row in reader]
-    #     print(data_read[0])
-
-    # file_csv = str(os.path.join(get_output_directory(), cfg.file_csv))  # from cfg.py file
-    # with open(file_csv, 'w', newline='', encoding='utf-8') as csv_file:  # Just use 'w' mode in 3.x
 
     for key in csv_dict:
         csv_dict[key] = ''
     # csv_dict['DATA_SCRIPT_RUN'] = str(time.strftime("%Y-%m-%d"))
     csv_dict['FILENAME'] = file_name # file_path
 
-    # csv_file_open = csv.DictWriter(csv_file, csv_dict.keys(), delimiter=cfg.csv_delimiter)
-    # csv_file_open.writeheader()
-
-    #first_line = file_get_first_line(filename_with_path)
-
-    import codecs
     f = codecs.open(filename_with_path, 'r', 'UTF-8')
 
-    # get Headers from file
+    # get Headers from file (first line of file)
     for line in f:
         ss = line.strip()
         headers = ss.split(',')
@@ -161,14 +134,26 @@ def do_csv_file_in(filename_with_path=''):
         print('Columns from cfg: ' + str(len(column_names_in)))
         tt = [x for x in headers2 if x in column_names_in]  # [x for x in a if x in b]
         print('Сolumns matched: ' + str(len(tt)) + ' Columns: ' + str(tt))
-
         break    # break here
 
+    # do all lines in csv file
     for line in f:
-        next(f) # skip first ine
-        asd = str(line).split(cfg.csv_delimiter)
-        print(line)
+        next(f)  # skip first ine
+        try:
+            current_line = str(line).split(cfg.csv_delimiter)
+            compname = current_line[0].strip("\"")
+            file_full_path_name = current_line[1].strip("\"")
+            length = current_line[2].strip("\"")
+            tmpstr = current_line[3].replace(",", "")
+            tmpstr = tmpstr.replace("\"", "")
+            creation_time = tmpstr.strip()
 
+
+
+            print(line)
+
+        except Exception as e:
+            print("Exception occurred " + str(e), exc_info=True)
 
 
     # with open(filename_with_path, 'r', encoding='utf-8') as csvfile:
@@ -190,6 +175,8 @@ def do_csv_file_in(filename_with_path=''):
     #         qq = row['compname']
     #         aa = row['FullName']
     #         print(qq)
+    f.close()
+
 
 
 
