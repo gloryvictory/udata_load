@@ -96,6 +96,21 @@ def get_output_directory():
     return dir_out
 
 
+def get_file_name_with_extension(path):
+    return path.split('\\').pop().split('/')[0]        #  path.split('\\').pop().split('/').pop().rsplit('.', 1)[0]
+
+
+def get_file_name_without_extension(path):
+    return path.split('\\').pop().split('/').pop().rsplit(get_extension(path), 1)[0]
+
+
+
+def get_extension(filename):
+    basename = os.path.basename(filename)  # os independent
+    ext = '.'.join(basename.split('.')[1:])
+    return '.' + ext if ext else None
+
+
 def do_csv_file_in(filename_with_path=''):
     csv_dict = {'COMPNAME': '',
                 'DISK': '',
@@ -148,12 +163,44 @@ def do_csv_file_in(filename_with_path=''):
             tmpstr = tmpstr.replace("\"", "")
             creation_time = tmpstr.strip()
 
+            _is_profile = False
+
             _compname = compname
             _disk = file_full_path_name.split(":")[0]
             _folder = str(os.path.dirname(os.path.abspath(file_full_path_name)))
+            ss = _folder.lower()
+            if _folder.startswith("c:\\users"):
+                _is_profile = True
+            _filename_long = get_file_name_with_extension(file_full_path_name)
+            _filename_shot = get_file_name_without_extension(file_full_path_name)
+            _ext_long = get_extension(file_full_path_name)
+            _ext_shot = file_full_path_name.split(".")[-1]
+            _size = length
+            _fullname = file_full_path_name
+            _year = creation_time.split()[0]
+            _month = creation_time.split(".")[1]
+            _creationtime = creation_time
+            _fio = ''
+            _otdel = ''
+
+            _text = file_full_path_name.strip().lower()
+            _text = _text.replace(":"," ")
+            _text = _text.replace("\\", " ")
+            _text = _text.replace(",", " ")
+            _text = _text.replace(".", " ")
+            _text = _text.replace("-", " ")
+            _text = _text.replace(";", " ")
+            _text = _text.replace("\"", "")
+            _text = _text.replace("_", "")
+            _text = _text.replace("\'", "")
+
+            _textfull = _text
+            _textless = _text # need to tranformate
+            lastupdate = ''
 
 
             print(line)
+            #
 
         except Exception as e:
             print("Exception occurred " + str(e), exc_info=True)
