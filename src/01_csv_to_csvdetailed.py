@@ -21,7 +21,7 @@ import time
 from sys import platform as _platform
 from time import strftime  # Load just the strftime Module from Time
 from datetime import datetime
-#import csv
+import csv
 import codecs
 import logging
 
@@ -107,8 +107,15 @@ def get_file_name_without_extension(path=''):
 
 def get_extension(filename=''):
     basename = os.path.basename(filename)  # os independent
-    ext = '.'.join(basename.split('.')[1:])
+    ffile = filename.split('\\').pop().split('/').pop()
+    ext = '.'.join(ffile.split('.')[1:])
     return '.' + ext if ext else None
+
+
+# def get_extension(filename=''):
+#     basename = os.path.basename(filename)  # os independent
+#     ext = '.'.join(basename.split('.')[1:])
+#     return '.' + ext if ext else None
 
 
 def text_clear(str_input=''):
@@ -125,90 +132,102 @@ def text_clear(str_input=''):
     return ss
 
 
-def do_csv_file_in(filename_with_path=''):
-    csv_dict = {'COMPNAME': '',
-                'DISK': '',
-                'FOLDER': '',
-                'FILENAME': '',
-                # 'CODEPAGE': '',
-                # 'HAS_DEFIS': '',
-                # 'DATA_CREATION': '',
-                # 'DATA_MODIFY': '',
-                # 'DATA_LASTACCESS': '',
-                # 'DATA_SCRIPT_RUN': '',
-                # 'PRJ_INFO': '',
-                # 'COUNT_REC': '',
-                # 'COUNT_FIELDS': '',
-                'LAST_UPDATE': ''}  # 'CODEPAGE_DBF': '', # CODEPAGE_DBF -  work a long time
+def do_csv_file_in(filename_with_path='', file_csv=''):
+    # csv_dict = {'COMPNAME': '',
+    #             'DISK': '',
+    #             'FOLDER': '',
+    #             'IS_PROFILE': '',
+    #             'FILENAME_LONG': '',
+    #             'FILENAME_SHOT': '',
+    #             'EXT_LONG': '',
+    #             'EXT_SHOT': '',
+    #             'SIZE': '',
+    #             'FULLNAME': '',
+    #             'DATE': '',
+    #             'YEAR': '',
+    #             'MONTH': '',
+    #             'CREATIONTIME': '',
+    #             'FIO': '',
+    #             'OTDEL': '',
+    #             'TEXTFULL': '',
+    #             'TEXTLESS': '',
+    #             'LASTUPDATE': ''}
+
 
     file_name = filename_with_path.split('.')[0]
-
+    csv_dict = cfg.csv_dict
     for key in csv_dict:
         csv_dict[key] = ''
     # csv_dict['DATA_SCRIPT_RUN'] = str(time.strftime("%Y-%m-%d"))
-    csv_dict['FILENAME'] = file_name # file_path
+    # csv_dict['FILENAME'] = file_name # file_path
 
-    f = codecs.open(filename_with_path, 'r', 'UTF-8')
+    with open(file_csv, 'a', newline='', encoding='utf-8') as csv_file:  # Just use 'w' mode in 3.x
+        csv_file_open = csv.DictWriter(csv_file, cfg.csv_dict.keys(), delimiter=cfg.csv_delimiter)
 
-    # get Headers from file (first line of file)
-    for line in f:
-        ss = line.strip()
-        headers = ss.split(',')
-        headers2 = []
-        for header in headers:
-            ss = header.strip('\"')
-            headers2.append(ss)
-        print('Columns from csv_file: ' + str(len(headers)) + ' in File: ' + filename_with_path)
-        column_names_in = cfg.csv_fieldnames_in
-        print('Columns from cfg: ' + str(len(column_names_in)))
-        tt = [x for x in headers2 if x in column_names_in]  # [x for x in a if x in b]
-        print('Сolumns matched: ' + str(len(tt)) + ' Columns: ' + str(tt))
-        break    # break here
+        f = codecs.open(filename_with_path, 'r', 'UTF-8')
 
-    # do all lines in csv file
-    next(f)  # skip first line
-    for line in f:
-        try:
-            current_line = str(line).split(cfg.csv_delimiter)
-            compname = current_line[0].strip("\"")
-            file_full_path_name = current_line[1].strip("\"")
-            length = current_line[2].strip("\"")
-            tmpstr = current_line[3].replace(",", "")
-            tmpstr = tmpstr.replace("\"", "")
-            creation_time = tmpstr.strip()
+        # get Headers from file (first line of file)
+        for line in f:
+            ss = line.strip()
+            headers = ss.split(',')
+            headers2 = []
+            for header in headers:
+                ss = header.strip('\"')
+                headers2.append(ss)
+            print('Columns from csv_file: ' + str(len(headers)) + ' in File: ' + filename_with_path)
+            column_names_in = cfg.csv_fieldnames_in
+            print('Columns from cfg: ' + str(len(column_names_in)))
+            tt = [x for x in headers2 if x in column_names_in]  # [x for x in a if x in b]
+            print('Сolumns matched: ' + str(len(tt)) + ' Columns: ' + str(tt))
+            break    # break here
 
-            _is_profile = False
+        # do all lines in csv file
+        next(f)  # skip first line
+        for line in f:
+            try:
+                current_line = str(line).split(cfg.csv_delimiter)
+                compname = current_line[0].strip("\"")
+                file_full_path_name = current_line[1].strip("\"")
+                length = current_line[2].strip("\"")
+                tmpstr = current_line[3].replace(",", "")
+                tmpstr = tmpstr.replace("\"", "")
+                creation_time = tmpstr.strip()
 
-            _compname = compname
-            _disk = file_full_path_name.split(":")[0]
-            _folder = str(os.path.dirname(os.path.abspath(file_full_path_name)))
-            ss = _folder.lower()
-            if _folder.startswith("c:\\users"):
-                _is_profile = True
-            _filename_long = get_file_name_with_extension(file_full_path_name)
-            _filename_shot = get_file_name_without_extension(file_full_path_name)
-            _ext_long = get_extension(file_full_path_name)
-            _ext_shot = file_full_path_name.split(".")[-1]
-            _size = length
-            _fullname = file_full_path_name
-            _date = creation_time.split()[0]
-            _year = _date.split(".")[-1]
-            _month = creation_time.split(".")[1]
-            _creationtime = creation_time
-            _fio = ''
-            _otdel = ''
+                csv_dict['COMPNAME'] = compname
+                csv_dict['DISK'] = file_full_path_name.split(":")[0]
+                _folder = str(os.path.dirname(os.path.abspath(file_full_path_name)))
+                csv_dict['FOLDER'] = _folder
+                #ss = _folder.lower()
+                _is_profile = False
+                if _folder.startswith("c:\\users"):
+                    _is_profile = True
+                csv_dict['IS_PROFILE'] = _is_profile
+                csv_dict['FILENAME_LONG'] = get_file_name_with_extension(file_full_path_name)
+                csv_dict['FILENAME_SHOT'] = get_file_name_without_extension(file_full_path_name)
+                csv_dict['EXT_LONG'] = get_extension(file_full_path_name)
+                csv_dict['EXT_SHOT'] = file_full_path_name.split(".")[-1]
+                csv_dict['SIZE'] = length
+                csv_dict['FULLNAME'] = file_full_path_name
+                _date = creation_time.split()[0]
+                csv_dict['DATE'] = _date
+                csv_dict['YEAR'] = _date.split(".")[-1]
+                csv_dict['MONTH'] = creation_time.split(".")[1]
+                csv_dict['CREATIONTIME'] = creation_time
+                csv_dict['FIO'] = ''
+                csv_dict['OTDEL'] = ''
 
-            _textfull = text_clear(file_full_path_name)
-            _textless = _textfull # need to tranformate
-            lastupdate = ''
+                csv_dict['TEXTFULL'] = text_clear(file_full_path_name)
+                csv_dict['TEXTLESS'] = csv_dict['TEXTFULL']  # need to tranformate
+                csv_dict['LASTUPDATE'] = ''
 
-            logging.info(_filename_long)
-            #print(line)
-            print(_filename_long)
-            #
+                logging.info(csv_dict['FILENAME_LONG'])
 
-        except Exception as e:
-            print("Exception occurred " + str(e), exc_info=True)
+                #print(line)
+                print(csv_dict['FILENAME_LONG'])
+                #
+                csv_file_open.writerow(csv_dict)
+            except Exception as e:
+                print("Exception occurred " + str(e))  # , exc_info=True
 
 
     # with open(filename_with_path, 'r', encoding='utf-8') as csvfile:
@@ -245,6 +264,10 @@ def do_csv_dir(dir_input=''):
     if os.path.isfile(file_csv):
         os.remove(file_csv)
 
+    with open(file_csv, 'w', newline='', encoding='utf-8') as csv_file:  # Just use 'w' mode in 3.x
+        csv_file_open = csv.DictWriter(csv_file, cfg.csv_dict.keys(), delimiter=cfg.csv_delimiter)
+        csv_file_open.writeheader()
+
     # for root, subdirs, files in os.walk(dir_input):
     #     for file in os.listdir(root):
     #         file_path = str(os.path.join(root, file)).lower()
@@ -252,7 +275,7 @@ def do_csv_dir(dir_input=''):
     #         if os.path.isfile(file_path) and file_path.endswith('csv'):     #ext == "csv":
     #             do_csv_file_in(file_path) #'e:\\temp\\csv\\weizelev-c-.csv'
 
-    do_csv_file_in('/Users/glory/Desktop/Dropbox/MyPrj/GitHubProjects/udata_load/examples/in/weizelev-c-.csv')  # 'e:\\temp\\csv\\weizelev-c-.csv'
+    do_csv_file_in('/Users/glory/Desktop/Dropbox/MyPrj/GitHubProjects/udata_load/examples/in/weizelev-c-.csv', file_csv)  # 'e:\\temp\\csv\\weizelev-c-.csv'
     logging.info('/Users/glory/Desktop/Dropbox/MyPrj/GitHubProjects/udata_load/examples/in/weizelev-c-.csv')
 
 
