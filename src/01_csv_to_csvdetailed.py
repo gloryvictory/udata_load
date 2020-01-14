@@ -3,16 +3,16 @@
 #
 #   Author          :   Viacheslav Zamaraev
 #   email           :   zamaraev@gmail.com
-#   Script Name     : 01_shp_prj_srid_identify_check.py
-#   Created         : 25th September 2019
-#   Last Modified	: 25th September 2019
+#   Script Name     : 01_csv_to_csvdetailed.py
+#   Created         : 25th December 2019
+#   Last Modified	: 25th December 2019
 #   Version		    : 1.0
-#   PIP             : pip install sridentify chardet openpyxl pandas
-#   RESULT          : csv file with columns: FILENAME;PRJ;SRID;METADATA;CODEPAGE;HAS_DEFIS;DATA_CREATION;DATA_MODIFY;DATA_LASTACCESS
+#   PIP             : pip install pewee
+#   RESULT          : csv file with columns: FILENAME;...LASTACCESS
 # Modifications	: 1.1 -
 #               : 1.2 -
 #
-# Description   : This script will search some *.shp files in the given directory and makes CSV file with some information
+# Description   : This script will search some *.csv files in the given directory and makes CSV file with some information
 
 import os  # Load the Library Module
 import os.path
@@ -23,6 +23,7 @@ from time import strftime  # Load just the strftime Module from Time
 from datetime import datetime
 #import csv
 import codecs
+import logging
 
 # non standard packages
 
@@ -165,8 +166,8 @@ def do_csv_file_in(filename_with_path=''):
         break    # break here
 
     # do all lines in csv file
+    next(f)  # skip first line
     for line in f:
-        next(f)  # skip first ine
         try:
             current_line = str(line).split(cfg.csv_delimiter)
             compname = current_line[0].strip("\"")
@@ -201,8 +202,9 @@ def do_csv_file_in(filename_with_path=''):
             _textless = _textfull # need to tranformate
             lastupdate = ''
 
-
-            print(line)
+            logging.info(_filename_long)
+            #print(line)
+            print(_filename_long)
             #
 
         except Exception as e:
@@ -243,11 +245,6 @@ def do_csv_dir(dir_input=''):
     if os.path.isfile(file_csv):
         os.remove(file_csv)
 
-    # Если выходной LOG файл существует - удаляем его
-    file_log = str(os.path.join(get_output_directory(), cfg.file_log))  # from cfg.file
-    if os.path.isfile(file_log):
-        os.remove(file_log)
-
     # for root, subdirs, files in os.walk(dir_input):
     #     for file in os.listdir(root):
     #         file_path = str(os.path.join(root, file)).lower()
@@ -255,8 +252,21 @@ def do_csv_dir(dir_input=''):
     #         if os.path.isfile(file_path) and file_path.endswith('csv'):     #ext == "csv":
     #             do_csv_file_in(file_path) #'e:\\temp\\csv\\weizelev-c-.csv'
 
-    do_csv_file_in('e:\\temp\\csv\\weizelev-c-.csv')  # 'e:\\temp\\csv\\weizelev-c-.csv'
+    do_csv_file_in('/Users/glory/Desktop/Dropbox/MyPrj/GitHubProjects/udata_load/examples/in/weizelev-c-.csv')  # 'e:\\temp\\csv\\weizelev-c-.csv'
+    logging.info('/Users/glory/Desktop/Dropbox/MyPrj/GitHubProjects/udata_load/examples/in/weizelev-c-.csv')
 
+
+def do_log_file():
+    for handler in logging.root.handlers[:]:  # Remove all handlers associated with the root logger object.
+        logging.root.removeHandler(handler)
+
+    dir_out = get_output_directory()
+    file_log = str(os.path.join(dir_out, cfg.file_log))  # from cfg.file
+    if os.path.isfile(file_log):     # Если выходной LOG файл существует - удаляем его
+        os.remove(file_log)
+    logging.basicConfig(filename=file_log, format='%(asctime)s %(levelname)s %(message)s', level=logging.DEBUG,
+                        filemode='w')  #
+    logging.info(file_log)
 
 
 # ---------------- do main --------------------------------
@@ -266,6 +276,7 @@ def main():
 
     dir_input = get_input_directory()
 
+    do_log_file()
     do_csv_dir(dir_input)
 
     # csv2xls()

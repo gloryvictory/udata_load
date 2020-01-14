@@ -10,6 +10,8 @@
 venv
 test.code-workspace
 examples
+in/*
+out/*
 cfg.py
 out
 __pycache__
