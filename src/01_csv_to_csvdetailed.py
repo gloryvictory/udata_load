@@ -98,18 +98,34 @@ def get_output_directory():
 
 
 def get_file_name_with_extension(path=''):
-    return path.split('\\').pop().split('/')[0]        #  path.split('\\').pop().split('/').pop().rsplit('.', 1)[0]
+    ext = get_extension(path)
+    if len(ext):
+        return path.split('\\').pop().split('/')[0]
+    else:
+        return path.split('\\').pop().split('/').pop()[0]
+
+    # return path.split('\\').pop().split('/')[0]        #  path.split('\\').pop().split('/').pop().rsplit('.', 1)[0]
 
 
 def get_file_name_without_extension(path=''):
-    return path.split('\\').pop().split('/').pop().rsplit(get_extension(path), 1)[0]
+    ext = get_extension(path)
+    if len(ext):
+        return path.split('\\').pop().split('/').pop().rsplit(ext, 1)[0]
+    else:
+        return path.split('\\').pop().split('/').pop()[0]
+
+    #return path.split('\\').pop().split('/').pop().rsplit(get_extension(path), 1)[0]
 
 
 def get_extension(filename=''):
     basename = os.path.basename(filename)  # os independent
     ffile = filename.split('\\').pop().split('/').pop()
     ext = '.'.join(ffile.split('.')[1:])
-    return '.' + ext if ext else None
+
+    if len(ext):
+        return '.' + ext if ext else None
+    else:
+        return ''
 
 
 # def get_extension(filename=''):
@@ -159,7 +175,6 @@ def do_csv_file_in(filename_with_path='', file_csv=''):
     for key in csv_dict:
         csv_dict[key] = ''
     # csv_dict['DATA_SCRIPT_RUN'] = str(time.strftime("%Y-%m-%d"))
-    # csv_dict['FILENAME'] = file_name # file_path
 
     with open(file_csv, 'a', newline='', encoding='utf-8') as csv_file:  # Just use 'w' mode in 3.x
         csv_file_open = csv.DictWriter(csv_file, cfg.csv_dict.keys(), delimiter=cfg.csv_delimiter)
@@ -204,8 +219,9 @@ def do_csv_file_in(filename_with_path='', file_csv=''):
                 csv_dict['IS_PROFILE'] = _is_profile
                 csv_dict['FILENAME_LONG'] = get_file_name_with_extension(file_full_path_name)
                 csv_dict['FILENAME_SHOT'] = get_file_name_without_extension(file_full_path_name)
-                csv_dict['EXT_LONG'] = get_extension(file_full_path_name)
-                csv_dict['EXT_SHOT'] = file_full_path_name.split(".")[-1]
+                _ext_long = get_extension(file_full_path_name)
+                csv_dict['EXT_LONG'] = _ext_long
+                csv_dict['EXT_SHOT'] = _ext_long.split(".")[-1]
                 csv_dict['SIZE'] = length
                 csv_dict['FULLNAME'] = file_full_path_name
                 _date = creation_time.split()[0]
@@ -220,7 +236,7 @@ def do_csv_file_in(filename_with_path='', file_csv=''):
                 csv_dict['TEXTLESS'] = csv_dict['TEXTFULL']  # need to tranformate
                 csv_dict['LASTUPDATE'] = ''
 
-                logging.info(csv_dict['FILENAME_LONG'])
+                #logging.info(csv_dict['FILENAME_LONG'])
 
                 #print(line)
                 print(csv_dict['FILENAME_LONG'])
@@ -229,27 +245,7 @@ def do_csv_file_in(filename_with_path='', file_csv=''):
             except Exception as e:
                 print("Exception occurred " + str(e))  # , exc_info=True
 
-
-    # with open(filename_with_path, 'r', encoding='utf-8') as csvfile:
-    #     #read the CSV file into a dictionary
-    #     dict_reader = csv.DictReader(csvfile, dialect='excel', quotechar='"', delimiter=cfg.csv_delimiter)
-    #     column_names = dict_reader.fieldnames
-    #     column_names_in = cfg.csv_fieldnames_in
-    #
-    #     print('Columns from cfg: ' + str(len(column_names_in)))
-    #     print('Columns from csv_file: ' + str(len(column_names)) + ' in File: ' + filename_with_path)
-    #
-    #     tt = [x for x in column_names if x in column_names_in]  # [x for x in a if x in b]
-    #     print('Сolumns matched: ' + str(len(tt)) + ' Columns: ' + str(tt))
-    #
-    #     reader = csv.reader(csvfile)
-    #     for row in reader:
-    #         #do your processing here
-    #         asd = str(row).split(cfg.csv_delimiter)
-    #         qq = row['compname']
-    #         aa = row['FullName']
-    #         print(qq)
-    f.close()
+        f.close()
 
 
 
@@ -273,7 +269,12 @@ def do_csv_dir(dir_input=''):
     #         file_path = str(os.path.join(root, file)).lower()
     #         ext = '.'.join(file.split('.')[1:]).lower()
     #         if os.path.isfile(file_path) and file_path.endswith('csv'):     #ext == "csv":
-    #             do_csv_file_in(file_path) #'e:\\temp\\csv\\weizelev-c-.csv'
+    #             #do_csv_file_in(file_path) #'e:\\temp\\csv\\weizelev-c-.csv'
+    #             time1 = datetime.now()
+    #             do_csv_file_in(file_path, file_csv)  # 'e:\\temp\\csv\\weizelev-c-.csv'
+    #             time2 = datetime.now()
+    #             ss = 'Total time: ' + str(time2 - time1) + ' ' + file_path
+    #             logging.info(ss)
 
     do_csv_file_in('/Users/glory/Desktop/Dropbox/MyPrj/GitHubProjects/udata_load/examples/in/weizelev-c-.csv', file_csv)  # 'e:\\temp\\csv\\weizelev-c-.csv'
     logging.info('/Users/glory/Desktop/Dropbox/MyPrj/GitHubProjects/udata_load/examples/in/weizelev-c-.csv')
