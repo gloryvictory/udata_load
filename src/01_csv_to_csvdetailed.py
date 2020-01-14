@@ -96,19 +96,32 @@ def get_output_directory():
     return dir_out
 
 
-def get_file_name_with_extension(path):
+def get_file_name_with_extension(path=''):
     return path.split('\\').pop().split('/')[0]        #  path.split('\\').pop().split('/').pop().rsplit('.', 1)[0]
 
 
-def get_file_name_without_extension(path):
+def get_file_name_without_extension(path=''):
     return path.split('\\').pop().split('/').pop().rsplit(get_extension(path), 1)[0]
 
 
-
-def get_extension(filename):
+def get_extension(filename=''):
     basename = os.path.basename(filename)  # os independent
     ext = '.'.join(basename.split('.')[1:])
     return '.' + ext if ext else None
+
+
+def text_clear(str_input=''):
+    ss = str_input.lower().strip()
+    ss = ss.replace(":", " ")
+    ss = ss.replace("\\", " ")
+    ss = ss.replace(",", " ")
+    ss = ss.replace(".", " ")
+    ss = ss.replace("-", " ")
+    ss = ss.replace(";", " ")
+    ss = ss.replace("\"", "")
+    ss = ss.replace("_", "")
+    ss = ss.replace("\'", "")
+    return ss
 
 
 def do_csv_file_in(filename_with_path=''):
@@ -177,25 +190,15 @@ def do_csv_file_in(filename_with_path=''):
             _ext_shot = file_full_path_name.split(".")[-1]
             _size = length
             _fullname = file_full_path_name
-            _year = creation_time.split()[0]
+            _date = creation_time.split()[0]
+            _year = _date.split(".")[-1]
             _month = creation_time.split(".")[1]
             _creationtime = creation_time
             _fio = ''
             _otdel = ''
 
-            _text = file_full_path_name.strip().lower()
-            _text = _text.replace(":"," ")
-            _text = _text.replace("\\", " ")
-            _text = _text.replace(",", " ")
-            _text = _text.replace(".", " ")
-            _text = _text.replace("-", " ")
-            _text = _text.replace(";", " ")
-            _text = _text.replace("\"", "")
-            _text = _text.replace("_", "")
-            _text = _text.replace("\'", "")
-
-            _textfull = _text
-            _textless = _text # need to tranformate
+            _textfull = text_clear(file_full_path_name)
+            _textless = _textfull # need to tranformate
             lastupdate = ''
 
 
