@@ -102,7 +102,7 @@ def get_file_name_with_extension(path=''):
     if len(ext):
         return path.split('\\').pop().split('/')[0]
     else:
-        return path.split('\\').pop().split('/').pop()[0]
+        return path.split('\\').pop().split('/').pop()
 
     # return path.split('\\').pop().split('/')[0]        #  path.split('\\').pop().split('/').pop().rsplit('.', 1)[0]
 
@@ -212,7 +212,7 @@ def do_csv_file_in(filename_with_path='', file_csv=''):
                 csv_dict['DISK'] = file_full_path_name.split(":")[0]
                 _folder = str(os.path.dirname(os.path.abspath(file_full_path_name)))
                 csv_dict['FOLDER'] = _folder
-                #ss = _folder.lower()
+                _folder = _folder.lower()
                 _is_profile = False
                 if _folder.startswith("c:\\users"):
                     _is_profile = True
