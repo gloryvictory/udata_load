@@ -67,9 +67,9 @@ class Udata(Model):
 
     class Meta:
         database = db
-        indexes = (
-            # create a unique on ...
-            (('compname', 'disk'), True),)
+        # indexes = (
+        #     # create a unique on ...
+        #     (('compname'), True),)
 
 
 
@@ -316,7 +316,7 @@ def do_csv_file_in_dir_out_to_db(filename_with_path='', file_csv=''):
         csv_dict[key] = ''
     # csv_dict['DATA_SCRIPT_RUN'] = str(time.strftime("%Y-%m-%d"))
 
-    _UDATA = Udata()
+
 
     with open(file_csv, 'a', newline='', encoding='utf-8') as csv_file:  # Just use 'w' mode in 3.x
         csv_file_open = csv.DictWriter(csv_file, cfg.csv_dict.keys(), delimiter=cfg.csv_delimiter)
@@ -342,6 +342,7 @@ def do_csv_file_in_dir_out_to_db(filename_with_path='', file_csv=''):
         next(f)  # skip first line
         for line in f:
             try:
+                _UDATA = Udata()
                 current_line = str(line).split(cfg.csv_delimiter)
                 compname = current_line[0].strip("\"")
                 file_full_path_name = current_line[1].strip("\"")
@@ -415,21 +416,22 @@ def do_csv_dir(dir_input=''):
         csv_file_open = csv.DictWriter(csv_file, cfg.csv_dict.keys(), delimiter=cfg.csv_delimiter)
         csv_file_open.writeheader()
 
-    for root, subdirs, files in os.walk(dir_input):
-        for file in os.listdir(root):
-            file_path = str(os.path.join(root, file)).lower()
-            ext = '.'.join(file.split('.')[1:]).lower()
-            if os.path.isfile(file_path) and file_path.endswith('csv'):     #ext == "csv":
-                #do_csv_file_in(file_path) #'e:\\temp\\csv\\weizelev-c-.csv'
-                time1 = datetime.now()
-                #do_csv_file_in_dir_out_csv(file_path, file_csv)  # 'e:\\temp\\csv\\weizelev-c-.csv'
-                do_csv_file_in_dir_out_to_db(file_path, file_csv)  # 'e:\\temp\\csv\\weizelev-c-.csv'
-                time2 = datetime.now()
-                ss = 'Total time: ' + str(time2 - time1) + ' ' + file_path
-                logging.info(ss)
+    # for root, subdirs, files in os.walk(dir_input):
+    #     for file in os.listdir(root):
+    #         file_path = str(os.path.join(root, file)).lower()
+    #         ext = '.'.join(file.split('.')[1:]).lower()
+    #         if os.path.isfile(file_path) and file_path.endswith('csv'):     #ext == "csv":
+    #             #do_csv_file_in(file_path) #'e:\\temp\\csv\\weizelev-c-.csv'
+    #             time1 = datetime.now()
+    #             #do_csv_file_in_dir_out_csv(file_path, file_csv)  # 'e:\\temp\\csv\\weizelev-c-.csv'
+    #             do_csv_file_in_dir_out_to_db(file_path, file_csv)  # 'e:\\temp\\csv\\weizelev-c-.csv'
+    #             time2 = datetime.now()
+    #             ss = 'Total time: ' + str(time2 - time1) + ' ' + file_path
+    #             logging.info(ss)
 
     # do_csv_file_in('/Users/glory/Desktop/Dropbox/MyPrj/GitHubProjects/udata_load/examples/in/weizelev-c-.csv', file_csv)  # 'e:\\temp\\csv\\weizelev-c-.csv'
-    # logging.info('/Users/glory/Desktop/Dropbox/MyPrj/GitHubProjects/udata_load/examples/in/weizelev-c-.csv')
+    do_csv_file_in_dir_out_to_db('/Users/glory/Desktop/Dropbox/MyPrj/GitHubProjects/udata_load/examples/in/weizelev-c-.csv', file_csv)  # 'e:\\temp\\csv\\weizelev-c-.csv'
+    logging.info('/Users/glory/Desktop/Dropbox/MyPrj/GitHubProjects/udata_load/examples/in/weizelev-c-.csv')
 
 
 def do_log_file():
@@ -458,6 +460,9 @@ def main():
 
     db.connect()
     db.create_tables([Udata], safe=True)
+    #global _UDATA
+
+
 
     do_csv_dir(dir_input)
 
