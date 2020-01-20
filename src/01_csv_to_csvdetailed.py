@@ -459,9 +459,11 @@ def main():
     # Creating SQLIte DB
 
     db.connect()
+    #db.drop_tables([Udata])
     db.create_tables([Udata], safe=True)
-    #global _UDATA
 
+    #global _UDATA
+    #nrows = _UDATA.delete().execute()
 
 
     do_csv_dir(dir_input)
