@@ -13,6 +13,11 @@
 #               : 1.2 -
 #
 # Description   : This script will search some *.csv files in the given directory and makes CSV file with some information
+# create database udatadb;
+# create user udatauser with encrypted password 'secret_password';
+# grant all privileges on database udatadb to udatauser;
+# CREATE SCHEMA IF NOT EXISTS udataschema  AUTHORIZATION udatauser;
+# CREATE EXTENSION postgis;
 
 import os  # Load the Library Module
 import os.path
@@ -39,7 +44,12 @@ from peewee import *
 import cfg  # some global configurations
 
 
-db = SqliteDatabase('zsniigg.db')
+#db = SqliteDatabase('zsniigg.db')
+
+db = PostgresqlDatabase(cfg.database, host=cfg.host , port=None, user=cfg.user, password=cfg.user_password, autocommit=True, autorollback=True)   #  )
+#db = PostgresqlDatabase(cfg.database, user=cfg.user, password=cfg.user_password)   # host=cfg.host )
+#db.autorollback = True
+
 
 
 # Model for our entry table
@@ -378,7 +388,7 @@ def do_csv_file_in_dir_out_to_db(filename_with_path='', file_csv=''):
 
                 _UDATA.textfull = text_clear(file_full_path_name)
                 _UDATA.textless = text_clear(file_full_path_name)  # need to tranformate
-                _UDATA.lastupdate = ''
+                _UDATA.lastupdate = str(datetime.now())
 
                 #logging.info(csv_dict['FILENAME_LONG'])
 
