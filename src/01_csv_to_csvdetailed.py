@@ -7,7 +7,7 @@
 #   Created         : 25th December 2019
 #   Last Modified	: 25th December 2019
 #   Version		    : 1.0
-#   PIP             : pip install pewee
+#   PIP             : pip install pewee, psycopg2
 #   RESULT          : csv file with columns: FILENAME;...LASTACCESS
 # Modifications	: 1.1 -
 #               : 1.2 -
