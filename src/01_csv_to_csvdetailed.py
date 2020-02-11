@@ -332,81 +332,86 @@ def do_csv_file_in_dir_out_to_db(filename_with_path='', file_csv=''):
         csv_file_open = csv.DictWriter(csv_file, cfg.csv_dict.keys(), delimiter=cfg.csv_delimiter)
 
         f = codecs.open(filename_with_path, 'r', 'UTF-8')
+        try:
+            # get Headers from file (first line of file)
 
-        # get Headers from file (first line of file)
-        for line in f:
-            ss = line.strip()
-            headers = ss.split(',')
-            headers2 = []
-            for header in headers:
-                ss = header.strip('\"')
-                headers2.append(ss)
-            print('Columns from csv_file: ' + str(len(headers)) + ' in File: ' + filename_with_path)
-            column_names_in = cfg.csv_fieldnames_in
-            print('Columns from cfg: ' + str(len(column_names_in)))
-            tt = [x for x in headers2 if x in column_names_in]  # [x for x in a if x in b]
-            print('Сolumns matched: ' + str(len(tt)) + ' Columns: ' + str(tt))
-            break    # break here
+            for line in f:
+                if len(str(line)) > 2:
+                    ss = line.strip()
+                    headers = ss.split(',')
+                    headers2 = []
+                    for header in headers:
+                        ss = header.strip('\"')
+                        headers2.append(ss)
+                    print('Columns from csv_file: ' + str(len(headers)) + ' in File: ' + filename_with_path)
+                    column_names_in = cfg.csv_fieldnames_in
+                    print('Columns from cfg: ' + str(len(column_names_in)))
+                    tt = [x for x in headers2 if x in column_names_in]  # [x for x in a if x in b]
+                    print('Сolumns matched: ' + str(len(tt)) + ' Columns: ' + str(tt))
+                    # do all lines in csv file
+                    next(f)  # skip first line
+                    break    # break here
+                else:
+                    break  # break here
+            if len(str(line)) > 2:
+                for line in f:
+                    try:
+                        _UDATA = Udata()
+                        current_line = str(line).split(cfg.csv_delimiter)
+                        compname = current_line[0].strip("\"")
+                        file_full_path_name = current_line[1].strip("\"")
+                        length = current_line[2].strip("\"")
+                        tmpstr = current_line[3].replace(",", "")
+                        tmpstr = tmpstr.replace("\"", "")
+                        creation_time = tmpstr.strip()
 
-        # do all lines in csv file
-        next(f)  # skip first line
-        for line in f:
-            try:
-                _UDATA = Udata()
-                current_line = str(line).split(cfg.csv_delimiter)
-                compname = current_line[0].strip("\"")
-                file_full_path_name = current_line[1].strip("\"")
-                length = current_line[2].strip("\"")
-                tmpstr = current_line[3].replace(",", "")
-                tmpstr = tmpstr.replace("\"", "")
-                creation_time = tmpstr.strip()
+                        _UDATA.compname = compname
+                        _UDATA.disk = file_full_path_name.split(":")[0]
+                        _folder = str(os.path.dirname(os.path.abspath(file_full_path_name)))
+                        _UDATA.folder = _folder
+                        _folder = _folder.lower()
+                        _is_profile = False
+                        if _folder.startswith("c:\\users"):
+                            _is_profile = True
 
-                _UDATA.compname = compname
-                _UDATA.disk = file_full_path_name.split(":")[0]
-                _folder = str(os.path.dirname(os.path.abspath(file_full_path_name)))
-                _UDATA.folder = _folder
-                _folder = _folder.lower()
-                _is_profile = False
-                if _folder.startswith("c:\\users"):
-                    _is_profile = True
+                        _UDATA.is_profile = _is_profile
+                        _UDATA.filename_long = get_file_name_with_extension(file_full_path_name)
+                        _UDATA.filename_shot = get_file_name_without_extension(file_full_path_name)
+                        _ext_long = get_extension(file_full_path_name)
+                        _UDATA.ext_long = _ext_long
+                        _UDATA.ext_shot = _ext_long.split(".")[-1].lower()
+                        _UDATA.size = length
+                        _UDATA.fullname = file_full_path_name
+                        _date = creation_time.split()[0]
+                        _UDATA.date = _date
+                        _UDATA.year = _date.split(".")[-1]
+                        _UDATA.month = creation_time.split(".")[1]
+                        _UDATA.creationtime = creation_time
+                        _UDATA.fio = ''
+                        _UDATA.otdel = ''
 
-                _UDATA.is_profile = _is_profile
-                _UDATA.filename_long = get_file_name_with_extension(file_full_path_name)
-                _UDATA.filename_shot = get_file_name_without_extension(file_full_path_name)
-                _ext_long = get_extension(file_full_path_name)
-                _UDATA.ext_long = _ext_long
-                _UDATA.ext_shot = _ext_long.split(".")[-1].lower()
-                _UDATA.size = length
-                _UDATA.fullname = file_full_path_name
-                _date = creation_time.split()[0]
-                _UDATA.date = _date
-                _UDATA.year = _date.split(".")[-1]
-                _UDATA.month = creation_time.split(".")[1]
-                _UDATA.creationtime = creation_time
-                _UDATA.fio = ''
-                _UDATA.otdel = ''
+                        _UDATA.textfull = text_clear(file_full_path_name)
+                        _UDATA.textless = text_clear(file_full_path_name)  # need to tranformate
+                        _UDATA.lastupdate = str(datetime.now())
 
-                _UDATA.textfull = text_clear(file_full_path_name)
-                _UDATA.textless = text_clear(file_full_path_name)  # need to tranformate
-                _UDATA.lastupdate = str(datetime.now())
+                        #logging.info(csv_dict['FILENAME_LONG'])
 
-                #logging.info(csv_dict['FILENAME_LONG'])
+                        #print(line)
+                        _UDATA.save()
 
-                #print(line)
-                _UDATA.save()
+                        print(file_full_path_name)
+                        #
+                        #csv_file_open.writerow(csv_dict)
+                    except Exception as e:
+                        print("Exception occurred " + str(e))  # , exc_info=True
 
-                print(file_full_path_name)
-                #
-                #csv_file_open.writerow(csv_dict)
-            except Exception as e:
-                print("Exception occurred " + str(e))  # , exc_info=True
-
-            except IntegrityError:
-                #Person.get(Person.uid == iid)
-                _error = "IntegrityError Exception!!!: "
-                print(_error)
-                logging.info(_error)
-
+                    except IntegrityError:
+                        #Person.get(Person.uid == iid)
+                        _error = "IntegrityError Exception!!!: "
+                        print(_error)
+                        logging.info(_error)
+        except Exception as e:
+            print("Exception occurred " + str(e))  # , exc_info=True
 
         f.close()
 
@@ -440,8 +445,8 @@ def do_csv_dir(dir_input=''):
     #             logging.info(ss)
 
     # do_csv_file_in('/Users/glory/Desktop/Dropbox/MyPrj/GitHubProjects/udata_load/examples/in/weizelev-c-.csv', file_csv)  # 'e:\\temp\\csv\\weizelev-c-.csv'
-    do_csv_file_in_dir_out_to_db('/Users/glory/Desktop/Dropbox/MyPrj/GitHubProjects/udata_load/examples/in/weizelev-c-.csv', file_csv)  # 'e:\\temp\\csv\\weizelev-c-.csv'
-    logging.info('/Users/glory/Desktop/Dropbox/MyPrj/GitHubProjects/udata_load/examples/in/weizelev-c-.csv')
+    do_csv_file_in_dir_out_to_db('e:\\temp\\csv\\gaydukrm-g-.csv', file_csv)  # 'e:\\temp\\csv\\weizelev-c-.csv'
+    # logging.info('/Users/glory/Desktop/Dropbox/MyPrj/GitHubProjects/udata_load/examples/in/weizelev-c-.csv')
 
 
 def do_log_file():
