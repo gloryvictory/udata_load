@@ -298,7 +298,8 @@ def do_csv_file_in_dir_out_csv(filename_with_path='', file_csv=''):
         f.close()
 
 
-def do_csv_file_in_dir_out_to_db(filename_with_path='', file_csv=''):
+#def do_csv_file_in_dir_out_to_db(filename_with_path='', file_csv=''):
+def do_csv_file_in_dir_out_to_db(filename_with_path=''):
     # csv_dict = {'COMPNAME': '',
     #             'DISK': '',
     #             'FOLDER': '',
@@ -319,6 +320,7 @@ def do_csv_file_in_dir_out_to_db(filename_with_path='', file_csv=''):
     #             'TEXTLESS': '',
     #             'LASTUPDATE': ''}
 
+    file_csv = str(os.path.join(get_output_directory(), cfg.file_csv))  # from cfg.file
 
     file_name = filename_with_path.split('.')[0]
     csv_dict = cfg.csv_dict
@@ -330,6 +332,10 @@ def do_csv_file_in_dir_out_to_db(filename_with_path='', file_csv=''):
 
     with open(file_csv, 'a', newline='', encoding='utf-8') as csv_file:  # Just use 'w' mode in 3.x
         csv_file_open = csv.DictWriter(csv_file, cfg.csv_dict.keys(), delimiter=cfg.csv_delimiter)
+
+        logging.info(file_csv)
+        logging.info(str(os.getpid()))
+        print(str(os.getpid()))
 
         f = codecs.open(filename_with_path, 'r', 'UTF-8')
         try:
@@ -416,12 +422,37 @@ def do_csv_file_in_dir_out_to_db(filename_with_path='', file_csv=''):
         f.close()
 
 
+# def do_csv_dir(dir_input=''):
+#     # Если выходной CSV файл существует - удаляем его
+#     file_csv = str(os.path.join(get_output_directory(), cfg.file_csv)) # from cfg.file
+#     if os.path.isfile(file_csv):
+#         os.remove(file_csv)
+#
+#     with open(file_csv, 'w', newline='', encoding='utf-8') as csv_file:  # Just use 'w' mode in 3.x
+#         csv_file_open = csv.DictWriter(csv_file, cfg.csv_dict.keys(), delimiter=cfg.csv_delimiter)
+#         csv_file_open.writeheader()
+#
+#     # for root, subdirs, files in os.walk(dir_input):
+#     #     for file in os.listdir(root):
+#     #         file_path = str(os.path.join(root, file)).lower()
+#     #         ext = '.'.join(file.split('.')[1:]).lower()
+#     #         if os.path.isfile(file_path) and file_path.endswith('csv'):     #ext == "csv":
+#     #             #do_csv_file_in(file_path) #'e:\\temp\\csv\\weizelev-c-.csv'
+#     #             time1 = datetime.now()
+#     #             #do_csv_file_in_dir_out_csv(file_path, file_csv)  # 'e:\\temp\\csv\\weizelev-c-.csv'
+#     #             do_csv_file_in_dir_out_to_db(file_path, file_csv)  # 'e:\\temp\\csv\\weizelev-c-.csv'
+#     #             time2 = datetime.now()
+#     #             ss = 'Total time: ' + str(time2 - time1) + ' ' + file_path
+#     #             logging.info(ss)
+#
+#     # do_csv_file_in('/Users/glory/Desktop/Dropbox/MyPrj/GitHubProjects/udata_load/examples/in/weizelev-c-.csv', file_csv)  # 'e:\\temp\\csv\\weizelev-c-.csv'
+#     do_csv_file_in_dir_out_to_db('e:\\temp\\csv\\gaydukrm-g-.csv', file_csv)  # 'e:\\temp\\csv\\weizelev-c-.csv'
+#     # logging.info('/Users/glory/Desktop/Dropbox/MyPrj/GitHubProjects/udata_load/examples/in/weizelev-c-.csv')
 
-#    csv_file_open.writerow(csv_dict)
-#         csv_file.close()
 
 
-def do_csv_dir(dir_input=''):
+def get_list_csv_dir(dir_input=''):
+    listdir = []
     # Если выходной CSV файл существует - удаляем его
     file_csv = str(os.path.join(get_output_directory(), cfg.file_csv)) # from cfg.file
     if os.path.isfile(file_csv):
@@ -431,22 +462,28 @@ def do_csv_dir(dir_input=''):
         csv_file_open = csv.DictWriter(csv_file, cfg.csv_dict.keys(), delimiter=cfg.csv_delimiter)
         csv_file_open.writeheader()
 
-    # for root, subdirs, files in os.walk(dir_input):
-    #     for file in os.listdir(root):
-    #         file_path = str(os.path.join(root, file)).lower()
-    #         ext = '.'.join(file.split('.')[1:]).lower()
-    #         if os.path.isfile(file_path) and file_path.endswith('csv'):     #ext == "csv":
-    #             #do_csv_file_in(file_path) #'e:\\temp\\csv\\weizelev-c-.csv'
-    #             time1 = datetime.now()
-    #             #do_csv_file_in_dir_out_csv(file_path, file_csv)  # 'e:\\temp\\csv\\weizelev-c-.csv'
-    #             do_csv_file_in_dir_out_to_db(file_path, file_csv)  # 'e:\\temp\\csv\\weizelev-c-.csv'
-    #             time2 = datetime.now()
-    #             ss = 'Total time: ' + str(time2 - time1) + ' ' + file_path
-    #             logging.info(ss)
+    for root, subdirs, files in os.walk(dir_input):
+        for file in os.listdir(root):
+            file_path = str(os.path.join(root, file)).lower()
+            ext = '.'.join(file.split('.')[1:]).lower()
+            if os.path.isfile(file_path) and file_path.endswith('csv'):     #ext == "csv":
+                listdir.append(file_path)
 
-    # do_csv_file_in('/Users/glory/Desktop/Dropbox/MyPrj/GitHubProjects/udata_load/examples/in/weizelev-c-.csv', file_csv)  # 'e:\\temp\\csv\\weizelev-c-.csv'
-    do_csv_file_in_dir_out_to_db('e:\\temp\\csv\\gaydukrm-g-.csv', file_csv)  # 'e:\\temp\\csv\\weizelev-c-.csv'
-    # logging.info('/Users/glory/Desktop/Dropbox/MyPrj/GitHubProjects/udata_load/examples/in/weizelev-c-.csv')
+    return listdir
+
+
+##let try multithreading
+
+
+def do_multithreading(dir_input = ''):
+
+    list_csv = get_list_csv_dir(dir_input)
+
+    from multiprocessing import Pool
+    # кол-во потоков
+    with Pool(10) as p:
+         p.map(do_csv_file_in_dir_out_to_db, list_csv)
+    # #map(save_file_html_by_url, url_list)
 
 
 def do_log_file():
@@ -480,8 +517,11 @@ def main():
     #global _UDATA
     #nrows = _UDATA.delete().execute()
 
+    do_multithreading(dir_input)
 
-    do_csv_dir(dir_input)
+    #do_csv_dir(dir_input)
+
+
 
     # csv2xls()
 
