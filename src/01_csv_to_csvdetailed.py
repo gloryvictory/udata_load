@@ -321,6 +321,7 @@ def do_csv_file_in_dir_out_to_db(filename_with_path=''):
     #             'LASTUPDATE': ''}
 
     file_csv = str(os.path.join(get_output_directory(), cfg.file_csv))  # from cfg.file
+    print(file_csv)
 
     file_name = filename_with_path.split('.')[0]
     csv_dict = cfg.csv_dict
@@ -409,7 +410,8 @@ def do_csv_file_in_dir_out_to_db(filename_with_path=''):
                         #
                         #csv_file_open.writerow(csv_dict)
                     except Exception as e:
-                        print("Exception occurred " + str(e))  # , exc_info=True
+                        #print("Exception occurred do_csv_file_in_dir_out_to_db - UDATA.SAVE" + str(e))  # , exc_info=True
+                        pass # пропускаем
 
                     except IntegrityError:
                         #Person.get(Person.uid == iid)
@@ -417,7 +419,7 @@ def do_csv_file_in_dir_out_to_db(filename_with_path=''):
                         print(_error)
                         logging.info(_error)
         except Exception as e:
-            print("Exception occurred " + str(e))  # , exc_info=True
+            print("Exception occurred do_csv_file_in_dir_out_to_db" + str(e))  # , exc_info=True
 
         f.close()
 
@@ -461,13 +463,16 @@ def get_list_csv_dir(dir_input=''):
     with open(file_csv, 'w', newline='', encoding='utf-8') as csv_file:  # Just use 'w' mode in 3.x
         csv_file_open = csv.DictWriter(csv_file, cfg.csv_dict.keys(), delimiter=cfg.csv_delimiter)
         csv_file_open.writeheader()
-
-    for root, subdirs, files in os.walk(dir_input):
-        for file in os.listdir(root):
-            file_path = str(os.path.join(root, file)).lower()
-            ext = '.'.join(file.split('.')[1:]).lower()
-            if os.path.isfile(file_path) and file_path.endswith('csv'):     #ext == "csv":
-                listdir.append(file_path)
+    try:
+        for root, subdirs, files in os.walk(dir_input):
+            for file in os.listdir(root):
+                file_path = str(os.path.join(root, file))
+                #.lower() - под линуксом есть разница!!!
+                ext = '.'.join(file.split('.')[1:]).lower()
+                if os.path.isfile(file_path) and file_path.endswith('csv'):     #ext == "csv":
+                    listdir.append(file_path)
+    except Exception as e:
+        print("Exception occurred get_list_csv_dir" + str(e))
 
     return listdir
 
@@ -479,10 +484,18 @@ def do_multithreading(dir_input = ''):
 
     list_csv = get_list_csv_dir(dir_input)
 
-    from multiprocessing import Pool
-    # кол-во потоков
-    with Pool(10) as p:
-         p.map(do_csv_file_in_dir_out_to_db, list_csv)
+    try:
+        from multiprocessing import Pool
+    except Exception as e:
+        print("Exception occurred do_multithreading" + str(e))
+
+    try:
+        # кол-во потоков
+        with Pool(20) as p:
+             p.map(do_csv_file_in_dir_out_to_db, list_csv)
+    except Exception as e:
+        print("Exception occurred do_multithreading" + str(e))
+
     # #map(save_file_html_by_url, url_list)
 
 
@@ -507,7 +520,6 @@ def main():
     dir_input = get_input_directory()
 
     do_log_file()
-
     # Creating SQLIte DB
 
     db.connect()
