@@ -182,8 +182,12 @@ def do_csv_dir(dir_input=''):
                     else:
                         ss = csv_item['COMPNAME']
                         cnt_all = int(cnt_all) + int(csv_item['CNT'])
-                #print(csv_item)
-
+            csv_dict['COMPNAME'] = ss
+            csv_dict['CNT'] = cnt_all
+            ss = ''
+            cnt_all = 0
+            print(csv_dict)
+            csv_file_open.writerow(csv_dict)
 
 
 
